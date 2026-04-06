@@ -55,6 +55,18 @@ body {
   color: #000;
 }
 
+/* Keep scroll behavior but hide visible scrollbars across browsers. */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 @layer base {
   h1,
   h2 {

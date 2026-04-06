@@ -1,8 +1,32 @@
 import { BookOpenTextIcon, ExamIcon, NoteIcon, type IconProps } from "@phosphor-icons/react";
 import type { ComponentType } from "react";
+import { useEffect } from "react";
+import Lenis from "lenis";
 import NavBar from '../components/navbar';
+import Footer from '../components/footer';
 
 export default function HomePage(){
+    useEffect(() => {
+        const lenis = new Lenis({
+            smoothWheel: true,
+            syncTouch: true,
+        })
+
+        let rafId = 0
+
+        const raf = (time: number) => {
+            lenis.raf(time)
+            rafId = requestAnimationFrame(raf)
+        }
+
+        rafId = requestAnimationFrame(raf)
+
+        return () => {
+            cancelAnimationFrame(rafId)
+            lenis.destroy()
+        }
+    }, [])
+
     return(
         <>
         <div className="min-h-screen flex w-full flex-col items-center bg-white gap-10 select-none">
@@ -12,7 +36,7 @@ export default function HomePage(){
             {/* HERO */}
             <div className="w-[95vw] h-[40vh] flex items-end justify-end px-8 py-4 border-r-5 border-black">
                 <div className="absolute h-[40vh] w-[90vw] flex items-center justify-start">
-                    <h1 className="text-[10rem] opacity-55">
+                    <h1 className="text-[10rem] opacity-30">
                         FUCK THE PHILNITS
                     </h1>
                 </div>
@@ -24,7 +48,7 @@ export default function HomePage(){
             {/* INFORMATION */}
             <div className="w-full min-h-[20vh] flex flex-col items-center">
                 <h1 className="text-3xl font-bold mb-5">
-                    What the hell is NitPicker?
+                    What THE HELL is NitPicker?
                 </h1>
                 <div className="w-74">
                     <p className="text-center">
@@ -32,24 +56,15 @@ export default function HomePage(){
                     </p>
                 </div>
                 <div className="w-[71vw] h-[50vh] flex justify-between items-center px-10">
-                    <IconWithDesc content="A collection of previous PHILNITS exam." Icon={BookOpenTextIcon} ></IconWithDesc>
-                    <IconWithDesc content="Mock Exam simulation, just in case you want to test yourself." Icon={ExamIcon} ></IconWithDesc>
-                    <IconWithDesc content="Useful notes that may appear in the exam." Icon={NoteIcon} ></IconWithDesc>
+                    <IconWithDesc content="STUDY NOTES" Icon={BookOpenTextIcon} ></IconWithDesc>
+                    <IconWithDesc content="MOCK EXAM" Icon={ExamIcon} ></IconWithDesc>
+                    <IconWithDesc content="PREVIOUS EXAM" Icon={NoteIcon} ></IconWithDesc>
 
                 </div>
             </div>
 
-            <div className="min-h-[50vh] w-full border-2 border-black flex flex-col items-center">
-                <h1 className="text-3xl font-bold">
-                    Where Would You Want To Start?
-                </h1>
-            </div>
-
-            <div className="h-[5vh] w-full border-t-1 border-black flex items-center justify-center">
-                <h1 className="text-sm font-light tracking-wide ">
-                    nonua-was-here
-                </h1>
-            </div>
+            {/* FOOTER */}
+            <Footer></Footer>
         </div>
         </>
     )
@@ -63,14 +78,15 @@ type IconWithDescProps = {
 
 export function IconWithDesc({ content, Icon }: IconWithDescProps) {
     return (
-        <div className="flex flex-col items-center justify-start min-h-[35vh] gap-6">
-            <div className="flex h-40 aspect-square items-center justify-center rounded-full border-2 border-black
-            hover:shadow-2xs hover:scale-110 transition-all duration-300">
-                <Icon className="h-15 w-auto" weight="light" />
+        <div className="group relative flex flex-col items-center">
+            <div className="h-50 aspect-square bg-black hover:rotate-45 duration-300 transition-all cursor-pointer flex items-center justify-center">
+                <Icon color="white" className="h-14 w-auto group-hover:opacity-0 transition-all duration-300"></Icon>
             </div>
-
-            <div className="w-69">
-                <h1 className="text-lg text-black font-light text-center">{content}</h1>
+            <div className="
+            pointer-events-none absolute top-full mt-4 w-44 px-3 py-2 text-center text-sm opacity-0 -translate-y-49 transition-all -translate-x-22 duration-300 group-hover:opacity-100 group-hover:translate-x-0 flex item-center h-100">
+                <h1 className="text-7xl text-white font-extrabold [-webkit-text-stroke:1px_black]">
+                    { content }
+                </h1>
             </div>
         </div>
     )
