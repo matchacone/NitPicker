@@ -1,6 +1,7 @@
 import React from "react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import NavBar from "../components/navbar";
+import Footer from '../components/footer'
 
 // ==========================================
 // 1. DATA: NOTES CONTENT BASED ON FE EXAM BOOKS
@@ -281,7 +282,7 @@ export default function NotesPage() {
             </div>
             
             {/* FOOTER PADDING */}
-            <div className="h-32 w-full"></div>
+            <Footer></Footer>
         </div>
     );
 }
