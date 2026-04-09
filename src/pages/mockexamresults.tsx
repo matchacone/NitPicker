@@ -2,8 +2,13 @@ import NavBar from "../components/navbar";
 import Footer from "../components/footer";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { useNavigate } from "react-router-dom";
 import { formatClockFromSeconds, loadMockExamResult } from "../exam/mockExamModel";
+import "katex/dist/katex.min.css";
 
 const PASSING_PERCENTAGE = 60;
 
@@ -16,6 +21,11 @@ const normalizeLegacySymbols = (text: string): string =>
         .replace(/\uF0B8/g, "÷")
         .replace(/\uF0B4/g, "×")
         .replace(/\uF0B9/g, "≠");
+
+const normalizeMathDelimiters = (text: string): string =>
+    text
+        .replace(/\\\((.+?)\\\)/gs, (_, expression: string) => `$${expression}$`)
+        .replace(/\\\[(.+?)\\\]/gs, (_, expression: string) => `$$${expression}$$`);
 
 export default function MockExamResultsPage() {
     const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
@@ -208,9 +218,14 @@ export default function MockExamResultsPage() {
                                                     >
                                                         <div className="flex flex-col gap-1">
                                                             <p className="font-bold text-sm md:text-base">#{wrongQuestion.questionNumber} · {wrongQuestion.subjectTopic}</p>
-                                                            <p className="text-sm md:text-base leading-relaxed whitespace-pre-line">
-                                                                {normalizeLegacySymbols(wrongQuestion.questionText)}
-                                                            </p>
+                                                            <div className="text-sm md:text-base leading-relaxed prose prose-sm max-w-none prose-p:my-1">
+                                                                <ReactMarkdown
+                                                                    remarkPlugins={[remarkGfm, remarkMath]}
+                                                                    rehypePlugins={[rehypeKatex]}
+                                                                >
+                                                                    {normalizeMathDelimiters(normalizeLegacySymbols(wrongQuestion.questionText))}
+                                                                </ReactMarkdown>
+                                                            </div>
                                                         </div>
                                                         <div className="flex flex-col items-end gap-1 shrink-0">
                                                             <p className="text-xs md:text-sm opacity-60">Missed {index + 1}</p>
@@ -230,25 +245,56 @@ export default function MockExamResultsPage() {
                                                     >
                                                         <div className="px-3 md:px-4 pb-4 border-t border-black/10 flex flex-col gap-3">
                                                             <div className="pt-3 flex flex-col gap-2 text-sm md:text-base">
-                                                                <p>
-                                                                    <span className="font-semibold">Your answer:</span>{" "}
-                                                                    {wrongQuestion.selectedOption
-                                                                        ? `${wrongQuestion.selectedOption}${wrongQuestion.selectedOptionText ? ` - ${normalizeLegacySymbols(wrongQuestion.selectedOptionText)}` : ""}`
-                                                                        : "No answer selected"}
-                                                                </p>
-                                                                <p className="text-green-700">
-                                                                    <span className="font-semibold">Correct answer:</span>{" "}
-                                                                    {`${wrongQuestion.correctOption}${wrongQuestion.correctOptionText ? ` - ${normalizeLegacySymbols(wrongQuestion.correctOptionText)}` : ""}`}
-                                                                </p>
+                                                                <div>
+                                                                    <p><span className="font-semibold">Your answer:</span></p>
+                                                                    <div className="prose prose-sm max-w-none prose-p:my-0">
+                                                                        {wrongQuestion.selectedOption ? (
+                                                                            <ReactMarkdown
+                                                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                                                rehypePlugins={[rehypeKatex]}
+                                                                            >
+                                                                                {normalizeMathDelimiters(
+                                                                                    normalizeLegacySymbols(
+                                                                                        `${wrongQuestion.selectedOption}${wrongQuestion.selectedOptionText ? ` - ${wrongQuestion.selectedOptionText}` : ""}`,
+                                                                                    ),
+                                                                                )}
+                                                                            </ReactMarkdown>
+                                                                        ) : (
+                                                                            <p>No answer selected</p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-green-700">
+                                                                    <p><span className="font-semibold">Correct answer:</span></p>
+                                                                    <div className="prose prose-sm max-w-none prose-p:my-0">
+                                                                        <ReactMarkdown
+                                                                            remarkPlugins={[remarkGfm, remarkMath]}
+                                                                            rehypePlugins={[rehypeKatex]}
+                                                                        >
+                                                                            {normalizeMathDelimiters(
+                                                                                normalizeLegacySymbols(
+                                                                                    `${wrongQuestion.correctOption}${wrongQuestion.correctOptionText ? ` - ${wrongQuestion.correctOptionText}` : ""}`,
+                                                                                ),
+                                                                            )}
+                                                                        </ReactMarkdown>
+                                                                    </div>
+                                                                </div>
                                                             </div>
 
                                                             <div className="border-l-4 border-black pl-3">
                                                                 <p className="text-xs uppercase tracking-wide opacity-70 font-semibold">How to answer it</p>
-                                                                <p className="mt-1 text-sm md:text-base leading-relaxed whitespace-pre-line">
-                                                                    {wrongQuestion.answerExplanation
-                                                                        ? normalizeLegacySymbols(wrongQuestion.answerExplanation)
-                                                                        : "No detailed explanation available in the source markdown for this item."}
-                                                                </p>
+                                                                <div className="mt-1 text-sm md:text-base leading-relaxed prose prose-sm max-w-none prose-p:my-1">
+                                                                    {wrongQuestion.answerExplanation ? (
+                                                                        <ReactMarkdown
+                                                                            remarkPlugins={[remarkGfm, remarkMath]}
+                                                                            rehypePlugins={[rehypeKatex]}
+                                                                        >
+                                                                            {normalizeMathDelimiters(normalizeLegacySymbols(wrongQuestion.answerExplanation))}
+                                                                        </ReactMarkdown>
+                                                                    ) : (
+                                                                        <p>No detailed explanation available in the source markdown for this item.</p>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>

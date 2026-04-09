@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import NavBar from "../components/navbar";
 import Footer from "../components/footer";
 import { CaretLeftIcon, CaretRightIcon, PauseCircleIcon, PlayCircleIcon, EyeSlashIcon, EyeIcon, SmileySadIcon } from "@phosphor-icons/react";
@@ -11,6 +15,7 @@ import {
     saveMockExamResult,
     saveMockExamSession,
 } from "../exam/mockExamModel";
+import "katex/dist/katex.min.css";
 
 const resolveChoiceImageUrl = (imagePath: string): string => {
     const normalizedPath = imagePath.trim().replace(/\\/g, "/").replace(/^\.?\//, "");
@@ -31,6 +36,11 @@ const normalizeLegacySymbols = (text: string): string =>
         .replace(/\uF0B8/g, "÷")
         .replace(/\uF0B4/g, "×")
         .replace(/\uF0B9/g, "≠");
+
+const normalizeMathDelimiters = (text: string): string =>
+    text
+        .replace(/\\\((.+?)\\\)/gs, (_, expression: string) => `$${expression}$`)
+        .replace(/\\\[(.+?)\\\]/gs, (_, expression: string) => `$$${expression}$$`);
 
 export default function MockExamPage() {
     const navigate = useNavigate();
@@ -337,7 +347,14 @@ export default function MockExamPage() {
                             <h1 className="text-sm md:text-2xl opacity-55 font-extrabold text-right">{currentQuestion.subjectTopic.toUpperCase()}</h1>
                         </div>
 
-                        <p className="md:text-base text-justify leading-relaxed whitespace-pre-line">{normalizeLegacySymbols(currentQuestion.questionText)}</p>
+                        <div className="md:text-base text-justify leading-relaxed prose prose-sm max-w-none prose-p:my-1">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkMath]}
+                                rehypePlugins={[rehypeKatex]}
+                            >
+                                {normalizeMathDelimiters(normalizeLegacySymbols(currentQuestion.questionText))}
+                            </ReactMarkdown>
+                        </div>
 
                         {currentQuestion.tableText ? (
                             <div className="border border-black/25 bg-black/2 p-3 md:p-4">
@@ -375,7 +392,16 @@ export default function MockExamPage() {
                                             loading="lazy"
                                         />
                                     ) : null}
-                                    {choice.text ? <p className="text-sm md:text-base whitespace-pre-line mt-2">{normalizeLegacySymbols(choice.text)}</p> : null}
+                                    {choice.text ? (
+                                        <div className="text-sm md:text-base mt-2 prose prose-sm max-w-none prose-p:my-0">
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                rehypePlugins={[rehypeKatex]}
+                                            >
+                                                {normalizeMathDelimiters(normalizeLegacySymbols(choice.text))}
+                                            </ReactMarkdown>
+                                        </div>
+                                    ) : null}
                                 </div>
                             ))}
                         </div>
@@ -467,7 +493,14 @@ export default function MockExamPage() {
                                 {explanationVisible ? (
                                     <div className="border border-black/25 bg-black/5 p-3 md:p-4">
                                         <p className="font-extrabold text-xs md:text-sm mb-2 tracking-wide">HOW THIS IS ANSWERED</p>
-                                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-line">{normalizeLegacySymbols(currentAnswerExplanation)}</p>
+                                        <div className="text-sm md:text-base leading-relaxed prose prose-sm max-w-none prose-p:my-1">
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                rehypePlugins={[rehypeKatex]}
+                                            >
+                                                {normalizeMathDelimiters(normalizeLegacySymbols(currentAnswerExplanation))}
+                                            </ReactMarkdown>
+                                        </div>
                                     </div>
                                 ) : null}
                             </div>
