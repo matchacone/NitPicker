@@ -17,8 +17,8 @@ export default function MockExamPrepPage() {
   const navigate = useNavigate();
   const [examType, setExamType] = useState<"AM EXAM" | "PM EXAM">("AM EXAM");
   const [isTimed, setIsTimed] = useState(true);
-  const [durationMinutes, setDurationMinutes] = useState(90);
-  const [questionCount, setQuestionCount] = useState(80);
+  const [durationMinutes, setDurationMinutes] = useState<number | ''>(90);
+  const [questionCount, setQuestionCount] = useState<number | ''>(80);
   const [instantAnswers, setInstantAnswers] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>(allTopics);
   const [startError, setStartError] = useState<string | null>(null);
@@ -26,11 +26,25 @@ export default function MockExamPrepPage() {
   const closeStartErrorModal = () => setStartError(null);
 
   const handleStartExam = () => {
+    
+    if (questionCount === '') {
+      setStartError("Please enter the number of questions");
+      return;
+    }
+    
+    if (durationMinutes === '') {
+      setStartError("Please enter the timer duration");
+      return;
+    }
+    
+    const safeQuestionCount = questionCount;
+    const safeDurationMin = durationMinutes;
+    
     const examSettings: MockExamSettings = {
       examType,
       isTimed,
-      durationMinutes,
-      questionCount,
+      durationMinutes: safeDurationMin,
+      questionCount: safeQuestionCount,
       instantAnswers,
       selectedTopics,
     };
@@ -228,19 +242,27 @@ export default function MockExamPrepPage() {
                   <label className="flex flex-col gap-2 w-1/2">
                     <span className="text-sm lg:text-base">Duration (minutes)</span>
                     <input
-                      type="number"
-                      min={1}
-                      max={180}
-                      disabled={!isTimed}
+                      type="text"
                       value={durationMinutes}
-                      onChange={(event) => {
-                        const parsedMinutes = Number(event.target.value);
-                        if (Number.isNaN(parsedMinutes)) {
+                      onChange = {(e) => {
+                        const value = e.target.value;
+                        
+                        if (value === "") {
+                          setDurationMinutes('');
                           return;
                         }
-                        setDurationMinutes(Math.min(180, Math.max(1, parsedMinutes)));
+                        
+                        if (!/^\d+$/.test(value)) {
+                          return;
+                        }
+                        
+                        const parsedCount = Number(value);
+                        
+                        const clamped = Math.min(180, Math.max(1, parsedCount));
+                        
+                        setDurationMinutes(clamped);
                       }}
-                      className="border-2 px-3 py-2 disabled:opacity-45"
+                      className = "border-2 px-3 py-2"
                     />
                   </label>
                   <p className="text-xs opacity-70">Default: 90 minutes. Maximum: 180 minutes.</p>
@@ -252,18 +274,27 @@ export default function MockExamPrepPage() {
                   <label className="flex flex-col gap-2 max-w-xs">
                     <span className="text-sm lg:text-base">How many questions?</span>
                     <input
-                      type="number"
-                      min={1}
-                      max={100}
+                      type="text"
                       value={questionCount}
-                      onChange={(event) => {
-                        const parsedCount = Number(event.target.value);
-                        if (Number.isNaN(parsedCount)) {
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        
+                        if (value === "") {
+                          setQuestionCount('');
                           return;
                         }
-                        setQuestionCount(Math.min(100, Math.max(1, parsedCount)));
+                        
+                        if (!/^\d+$/.test(value)) {
+                          return;
+                        }
+                        
+                        const parsedCount = Number(value);
+                        
+                        const clamped = Math.min(100, Math.max(1, parsedCount));
+                        
+                        setQuestionCount(clamped);
                       }}
-                      className="border-2 px-3 py-2"
+                      className = "border-2 px-3 py-2"
                     />
                   </label>
                   <p className="text-xs opacity-70">Default: 80 questions. Maximum: 100 questions.</p>
